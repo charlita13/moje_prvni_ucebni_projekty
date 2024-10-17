@@ -6,10 +6,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 # zadání jména a hesla
-# username = input("Vložte své uživatelské jméno: ")
-# password = input("Vložte své heslo: ")
-username = "charlo13"
-password = "572859"
+username = input("Vložte své uživatelské jméno: ")
+password = input("Vložte své heslo: ")
 
 # načtení stránky
 driver = webdriver.Chrome()
@@ -42,9 +40,12 @@ WebDriverWait(driver, 5).until(
     EC.element_to_be_clickable((By.XPATH, "//img[@alt='Ukázat přehled']"))
 ).click()
 
-# stažení CSV
-time.sleep(2)
+# stažení po seřazení hodnot CSV
+time.sleep(1)
+driver.find_element(By.XPATH, "//div[@class='tablesorter-header-inner' and contains(text(),'Věk')]").click()
+time.sleep(1)
 driver.find_element(By.XPATH, "//a[@class='download' and text()='Stáhnout jako CSV']").click()
+time.sleep(2)
 
 # zavření prohlížeče
 driver.quit()
