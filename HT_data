@@ -40,7 +40,7 @@ WebDriverWait(driver, 5).until(
     EC.element_to_be_clickable((By.XPATH, "//img[@alt='Ukázat přehled']"))
 ).click()
 
-# stažení CSV
+# stažení CSV poté co seřadím data
 time.sleep(1)
 driver.find_element(By.XPATH, "//div[@class='tablesorter-header-inner' and contains(text(),'Věk')]").click()
 time.sleep(1)
