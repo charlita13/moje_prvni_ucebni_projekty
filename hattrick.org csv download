@@ -1,3 +1,4 @@
+from tkinter import *
 import requests
 from selenium import webdriver
 import time
@@ -5,47 +6,69 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-# zadání jména a hesla
-username = input("Vložte své uživatelské jméno: ")
-password = input("Vložte své heslo: ")
+okno = Tk()
+vyska = 150
+sirka = 350
+okno.geometry(f"{sirka}x{vyska}")
+okno.title("Převodník")
+okno.resizable(False, False)
+okno.iconbitmap("icon.ico")
 
-# načtení stránky
-driver = webdriver.Chrome()
-driver.maximize_window()
-driver.get("https://www.hattrick.org/cs/")
+def stazeni_hodnot(jmeno, heslo):
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    driver.get("https://www.hattrick.org/cs/")
 
-# akceptace cookies
-WebDriverWait(driver, 5).until(
-    EC.element_to_be_clickable((By.CLASS_NAME, "cky-btn-accept"))
-).click()
+    # akceptace cookies
+    WebDriverWait(driver, 5).until(
+        EC.element_to_be_clickable((By.CLASS_NAME, "cky-btn-accept"))
+    ).click()
 
-# zobrazení přihlašovacího formuláře
-driver.find_element(By.XPATH, "//a[contains(text(),'Už máš účet?')]").click()
-time.sleep(2)
+    # zobrazení přihlašovacího formuláře
+    driver.find_element(By.XPATH, "//a[contains(text(),'Už máš účet?')]").click()
+    time.sleep(2)
 
-# vyplnění uživ.jména a hesla a login
-WebDriverWait(driver, 5).until(
-    EC.presence_of_element_located((By.NAME, "ctl00$CPContent$ucLogin$txtUserName"))    # username
-).send_keys(username)
+    # vyplnění uživ.jména a hesla a login
+    WebDriverWait(driver, 5).until(
+        EC.presence_of_element_located((By.NAME, "ctl00$CPContent$ucLogin$txtUserName"))  # username
+    ).send_keys(jmeno)
 
-driver.find_element(By.NAME, "ctl00$CPContent$ucLogin$txtPassword").send_keys(password)     # heslo
-driver.find_element(By.NAME, "ctl00$CPContent$ucLogin$butLogin").click()    # login button
+    driver.find_element(By.NAME, "ctl00$CPContent$ucLogin$txtPassword").send_keys(heslo)  # heslo
+    driver.find_element(By.NAME, "ctl00$CPContent$ucLogin$butLogin").click()  # login button
 
-# prokliknutí se na požadovanou kartu
-WebDriverWait(driver, 5).until(
-    EC.element_to_be_clickable((By.ID, "playersLink"))
-).click()
+    # prokliknutí se na požadovanou kartu
+    WebDriverWait(driver, 5).until(
+        EC.element_to_be_clickable((By.ID, "playersLink"))
+    ).click()
 
-WebDriverWait(driver, 5).until(
-    EC.element_to_be_clickable((By.XPATH, "//img[@alt='Ukázat přehled']"))
-).click()
+    WebDriverWait(driver, 5).until(
+        EC.element_to_be_clickable((By.XPATH, "//img[@alt='Ukázat přehled']"))
+    ).click()
 
-# stažení CSV
-time.sleep(1)
-driver.find_element(By.XPATH, "//div[@class='tablesorter-header-inner' and contains(text(),'Věk')]").click()
-time.sleep(1)
-driver.find_element(By.XPATH, "//a[@class='download' and text()='Stáhnout jako CSV']").click()
-time.sleep(2)
+    # stažení CSV
+    time.sleep(1)
+    driver.find_element(By.XPATH, "//div[@class='tablesorter-header-inner' and contains(text(),'Věk')]").click()
+    time.sleep(1)
+    driver.find_element(By.XPATH, "//a[@class='download' and text()='Stáhnout jako CSV']").click()
+    time.sleep(2)
 
-# zavření prohlížeče
-driver.quit()
+    # zavření prohlížeče
+    driver.quit()
+
+user_name = Label(text="Username")
+user_name.place(x=20, y=10)
+
+password = Label(text="Password")
+password.place(x=20, y=40)
+
+entry_user_name = Entry(width=30)
+entry_user_name.focus()
+entry_user_name.place(x=100, y=10)
+
+entry_password = Entry(width=30)
+entry_password.place(x=100, y=40)
+
+download_data= Button(text="Stáhni CSV z hattrick.org", borderwidth=3, relief="raised", bg="gray", fg="black", command=lambda: stazeni_hodnot(entry_user_name.get(), entry_password.get()))
+download_data.place(x=15, y=70)
+
+okno.mainloop()
