@@ -1,0 +1,62 @@
+# importy
+import smtplib
+from tkinter import *
+import requests
+
+# vytvoření okna
+window = Tk()   # samotné vytvoření okna
+window.title("Moudro Kanye Westa")  # název okna
+window.minsize(width=400, height=250)   # definuju MINIMÁLNÍ rozměry okna
+window.resizable(True, True)    # možnost editovat velikost okna posunem hrany pro šířku a výšku
+window.config(bg="#ff9ebe")    # definuju barvu okna
+
+# url pro API data
+api_url = "https://api.kanye.rest/"
+
+# získání response z url a převod na JSON formát
+response = requests.get(api_url)
+data = response.json()
+
+# proměnné pro email
+name_email_send = "kratky.k.karel@gmail.com"
+password_email_send = "mlyf skvi gscs gbni"
+
+
+# funkce na odeslání emailu
+def zpracuj_email():
+    with smtplib.SMTP(host="smtp.gmail.com", port=587) as connection:   # užíváme TLS port
+        connection.starttls()
+        connection.login(name_email_send, password_email_send)
+        connection.sendmail(from_addr=name_email_send,
+                            to_addrs=prijemce_vstup.get(),
+                            msg=f"Subject: {predmet_vstup.get()}\n\n{data["quote"]}".encode("utf-8")
+                            )
+
+
+# prvky v okně
+odesilatel_label = Label(text="Odesílatel", font=("Arial", 10, "bold"), bg="#ff9ebe", fg="#1a1718")
+odesilatel_label.grid(row=0, column=0, padx=15, pady=10)
+
+prijemce_label = Label(text="Příjemce", font=("Arial", 10, "bold"), bg="#ff9ebe", fg="#1a1718")
+prijemce_label.grid(row=1, column=0, padx=15, pady=5)
+
+predmet = Label(text="Předmět", font=("Arial", 10, "bold"), bg="#ff9ebe", fg="#1a1718")
+predmet.grid(row=2, column=0, padx=15, pady=5)
+
+odesilatel_vstup = Label(text="kratky.k.karel@gmail.com", bg="#ff9ebe", fg="#1a1718")
+odesilatel_vstup.grid(row=0, column=1, padx=5, pady=10)
+
+prijemce_vstup = Entry(width=43)
+prijemce_vstup.insert(0, "@")
+prijemce_vstup.focus()
+prijemce_vstup.grid(row=1, column=1, padx=5, pady=10)
+
+predmet_vstup = Entry(width=43)
+predmet_vstup.insert(0, "Moudro Kanyeho Westa")
+predmet_vstup.grid(row=2, column=1, padx=5, pady=10)
+
+generuj_a_posli = Button(text="Vygeneruj citát a odešli email", command=zpracuj_email, width=30)
+generuj_a_posli.grid(row=3, column=1, padx=5, pady=10)
+
+# hlavní smyčka pro okno
+window.mainloop()
