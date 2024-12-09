@@ -122,3 +122,28 @@ button_search = Button(text="Search", command=lambda:search(entry_id.get()) if e
 button_search.grid(row=6, column=2)
 
 root.mainloop()
+
+--varianta s pool
+import psycopg2
+from psycopg2 import pool
+
+# inicializace poolu
+db_pool = pool.SimpleConnectionPool(1, 10, 
+        dbname='student',
+        user='postgres',
+        password='admin',
+        host='localhost',
+        port='5432')
+
+
+def create_with_pool():
+    with db_pool.getconn() as conn:
+        with conn.cursor() as cur:
+            cur.execute('''CREATE TABLE teacher(
+                ID SERIAL,
+                NAME TEXT,
+                AGE INT,
+                ADDRESS TEXT
+            )''')
+            conn.commit()
+        db_pool.putcon(conn)
