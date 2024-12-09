@@ -127,6 +127,9 @@ root.mainloop()
 import psycopg2
 from psycopg2 import pool
 
+
+
+
 # inicializace poolu
 db_pool = pool.SimpleConnectionPool(1, 10, 
         dbname='student',
@@ -136,14 +139,35 @@ db_pool = pool.SimpleConnectionPool(1, 10,
         port='5432')
 
 
+# vytvoření tabulky s pomocí poolu
 def create_with_pool():
     with db_pool.getconn() as conn:
         with conn.cursor() as cur:
-            cur.execute('''CREATE TABLE teacher(
+            cur.execute('''CREATE TABLE snehulak2(
                 ID SERIAL,
                 NAME TEXT,
                 AGE INT,
                 ADDRESS TEXT
             )''')
             conn.commit()
-        db_pool.putcon(conn)
+        db_pool.putconn(conn)
+
+
+# vložení hodnoty do tabulky s pomocí poolu
+def insert_data_with_pool():
+    with db_pool.getconn() as conn:
+        with conn.cursor() as cur:
+            teacher_name = input("Vložte jméno učitele: ")
+            teacher_age = input("Vložte věk učitele: ")
+            teacher_address = input("Vložte adresu učitele: ")
+            
+            query = ('''INSERT INTO snehulak2(name, age, address)
+                VALUES (%s, %s, %s)''')
+
+            cur.execute(query, (teacher_name, teacher_age, teacher_address))
+        
+            conn.commit()
+        db_pool.putconn(conn)
+
+create_with_pool()
+insert_data_with_pool()
