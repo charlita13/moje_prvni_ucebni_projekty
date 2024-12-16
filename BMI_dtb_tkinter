@@ -1,0 +1,102 @@
+from tkinter import *
+import psycopg2
+
+# funkce
+# výpočet BMI
+def bmi_calculator(vyska, vaha):
+    try:
+        vyska = float(vyska)
+        vaha = float(vaha)
+    except:
+        chyba_label["text"] = "Vložte číselné hodnoty"
+    return None
+
+    bmi = round(vaha / vyska**2, 2)
+    if bmi < 18.5:
+        bmi_text = "podváha"
+    elif bmi < 25:
+        bmi_text = "normální"
+    elif bmi < 30:
+        bmi_text = "nadváha"
+    elif bmi < 35:
+        bmi_text = "obezita"
+    else:
+        bmi_text = "extrémní obezita"
+
+    ciselny_label_vysledek["text"] = bmi
+    textovy_label_vysledek["text"] = bmi_text
+    insert_data(bmi, bmi_text)
+    users_label_value["text"] = select_count()
+
+
+def insert_data(bmi_n, bmi_t):
+    query = '''INSERT INTO bmi(bmi_number, bmi_text) VALUES (%s, %s)'''
+
+    with psycopg2.connect(dbname='health', user='postgres', password='admin', host='localhost', port='5432') as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, (bmi_n, bmi_t))
+
+
+def select_count():
+    query = '''SELECT COUNT(*) FROM bmi'''
+
+    with psycopg2.connect(dbname='health', user='postgres', password='admin', host='localhost', port='5432') as conn:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            count = cur.fetchone()
+            return count[0]
+
+
+def check_dots(cislo):
+    cislo_string = str(cislo)
+    #if ',' in cislo_string:
+    #return cislo_string.replace(",", ".")
+    #return cislo_string
+    return cislo_string.replace(",", ".") if "," in cislo_string else cislo_string
+
+
+root = Tk()
+root.resizable(False, False)
+root.title("BMI calculator")
+root.geometry('250x250')
+
+main_label = Label(root, text="Výpočet BMI indexu")
+main_label.grid(row=0, column=1)
+
+vyska_label = Label(root, text="Výška (m):")
+vyska_label.grid(row=1, column=0)
+
+vyska_entry = Entry(width=10)
+vyska_entry.grid(row=1, column=1)
+
+vaha_label = Label(root, text="Váha (kg):")
+vaha_label.grid(row=2, column=0)
+
+vaha_entry = Entry(width=10)
+vaha_entry.grid(row=2, column=1)
+
+vypocet_button = Button(text="Vypočítat", command=lambda:bmi_calculator(check_dots(vyska_entry.get()), check_dots(vaha_entry.get())))
+vypocet_button.grid(row=3, column=1)
+
+ciselny_label = Label(root, text="Číselný výsledek:")
+ciselny_label.grid(row=4, column=0)
+
+ciselny_label_vysledek = Label(root, text="")
+ciselny_label_vysledek.grid(row=4, column=1)
+
+textovy_label = Label(root, text="Textový výsledek:")
+textovy_label.grid(row=5, column=0)
+
+textovy_label_vysledek = Label(root, text="")
+textovy_label_vysledek.grid(row=5, column=1)
+
+users_label = Label(root, text="Počet uživatelů:")
+users_label.grid(row=6, column=0)
+
+users_label_value = Label(root, text=select_count())
+users_label_value.grid(row=6, column=1)
+
+chyba_label = Label(root, text='')
+chyba_label.grid(row=7, column=1)
+
+root.mainloop()
