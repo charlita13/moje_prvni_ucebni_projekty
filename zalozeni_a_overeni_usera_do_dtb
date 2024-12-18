@@ -1,8 +1,14 @@
-import bcrypt
+import bcrypt, psycopg2
 from tkinter import *
-import psycopg2
 
-# vložení dat dp dtb
+# clear data
+def clear_data():
+    username_entry.delete(0, END)
+    password_entry.delete(0, END)
+    username_entry.focus()
+
+
+# vložení dat do dtb
 def inser_data(email, heslo):
     query = '''INSERT INTO bank_user(email, password) VALUES(%s, %s)'''
 
@@ -13,10 +19,10 @@ def inser_data(email, heslo):
         with conn.cursor() as cur:
             cur.execute(query, (email, hashed_password.decode('utf-8')))
 
-    username_entry.delete(0, END)
-    password_entry.delete(0, END)
-    username_entry.focus()
+    clear_data()
 
+
+# overeni zadaneho jmena a hesla s dtb
 def login(email, heslo):
     user_password = bytes(heslo, encoding='utf-8')      
 
@@ -31,17 +37,13 @@ def login(email, heslo):
             else:
                 chyba = "NENALEZEN USER"
                 confirm_message["text"] = chyba
-                password_entry_login.delete(0, END)
-                username_entry_login.delete(0, END)
-                password_entry_login.focus()
+                clear_data()
                 return None
 
     if bcrypt.checkpw(user_password, stored_hashed_password.encode('utf-8')):
         chyba = "USPESNY LOGIN"
         confirm_message["text"] = chyba
-        username_entry_login.delete(0, END)
-        password_entry_login.delete(0, END)
-        username_entry_login.focus()
+        clear_data()
     else:
         chyba = "NESOUHLASI HESLO"
         confirm_message["text"] = chyba
@@ -49,8 +51,7 @@ def login(email, heslo):
         password_entry_login.focus()
 
 
-
-
+# tkinter cast
 vyska = 300
 sirka = 300
 
@@ -58,7 +59,7 @@ root = Tk()
 root.minsize(width=sirka, height=vyska)
 root.resizable(False, False)
 
-# frame
+# frames
 title_frame = Frame(root)
 title_frame.pack()
 
@@ -74,11 +75,11 @@ login_frame.pack()
 enter_frame = Frame(root)
 enter_frame.pack()
 
-# title part
+# title frame
 title_create_label = Label(title_frame, text="Create account", font=("Arial", 14, "bold"))
 title_create_label.pack()
 
-# create part
+# create frame
 user_name_label = Label(create_frame, text="Enter username")
 user_name_label.grid(row=0, column=0, pady=(10, 0))
 
@@ -88,17 +89,17 @@ user_pass_label.grid(row=1, column=0)
 username_entry = Entry(create_frame, width=30)
 username_entry.grid(row=0, column=1, pady=(10, 0), padx=(10, 0))
 
-password_entry = Entry(create_frame, width=30)
+password_entry = Entry(create_frame, width=30, show="*")
 password_entry.grid(row=1, column=1, padx=(10, 0))
 
-# create button part
+# create button frame
 create_button = Button(create_button_frame, text="Save", width=15, borderwidth=4, command=lambda:inser_data(username_entry.get(), password_entry.get()))
 create_button.pack(pady=(5, 0))
 
 title_login_label = Label(create_button_frame, text="Login section", font=("Arial", 14, "bold"))
 title_login_label.pack(pady=(20, 0))
 
-# login frame part
+# login frame
 user_name_label = Label(login_frame, text="Enter username")
 user_name_label.grid(row=0, column=0, pady=(10, 0))
 
@@ -109,10 +110,10 @@ username_entry_login = Entry(login_frame, width=30)
 username_entry_login.grid(row=0, column=1, pady=(10, 0), padx=(10, 0))
 username_entry_login.focus()
 
-password_entry_login = Entry(login_frame, width=30)
+password_entry_login = Entry(login_frame, width=30, show="*")
 password_entry_login.grid(row=1, column=1, padx=(10, 0))
 
-# entry frame part
+# entry frame
 enter_label = Button(enter_frame, text="Enter", width=15, borderwidth=4,command=lambda:login(username_entry_login.get(), password_entry_login.get()))
 enter_label.pack(pady=(5, 0))
 
@@ -120,4 +121,3 @@ confirm_message = Label(enter_frame, text=" ")
 confirm_message.pack()
 
 root.mainloop()
-
