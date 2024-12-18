@@ -1,0 +1,123 @@
+import bcrypt
+from tkinter import *
+import psycopg2
+
+# vložení dat dp dtb
+def inser_data(email, heslo):
+    query = '''INSERT INTO bank_user(email, password) VALUES(%s, %s)'''
+
+    password_bytes = bytes(heslo, encoding='utf-8')
+    hashed_password = bcrypt.hashpw(password_bytes , bcrypt.gensalt())
+
+    with psycopg2.connect(dbname='bank', user='postgres', password='admin', host='localhost', port='5432') as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, (email, hashed_password.decode('utf-8')))
+
+    username_entry.delete(0, END)
+    password_entry.delete(0, END)
+    username_entry.focus()
+
+def login(email, heslo):
+    user_password = bytes(heslo, encoding='utf-8')      
+
+    query = '''SELECT password FROM bank_user WHERE email = (%s)'''    
+
+    with psycopg2.connect(dbname='bank', user='postgres', password='admin', host='localhost', port='5432') as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, (email,))
+            user_hash_password = cur.fetchone()
+            if user_hash_password:
+                stored_hashed_password = user_hash_password[0]
+            else:
+                chyba = "NENALEZEN USER"
+                confirm_message["text"] = chyba
+                password_entry_login.delete(0, END)
+                username_entry_login.delete(0, END)
+                password_entry_login.focus()
+                return None
+
+    if bcrypt.checkpw(user_password, stored_hashed_password.encode('utf-8')):
+        chyba = "USPESNY LOGIN"
+        confirm_message["text"] = chyba
+        username_entry_login.delete(0, END)
+        password_entry_login.delete(0, END)
+        username_entry_login.focus()
+    else:
+        chyba = "NESOUHLASI HESLO"
+        confirm_message["text"] = chyba
+        password_entry_login.delete(0, END)
+        password_entry_login.focus()
+
+
+
+
+vyska = 300
+sirka = 300
+
+root = Tk()
+root.minsize(width=sirka, height=vyska)
+root.resizable(False, False)
+
+# frame
+title_frame = Frame(root)
+title_frame.pack()
+
+create_frame = Frame(root)
+create_frame.pack()
+
+create_button_frame = Frame(root)
+create_button_frame.pack()
+
+login_frame = Frame(root)
+login_frame.pack()
+
+enter_frame = Frame(root)
+enter_frame.pack()
+
+# title part
+title_create_label = Label(title_frame, text="Create account", font=("Arial", 14, "bold"))
+title_create_label.pack()
+
+# create part
+user_name_label = Label(create_frame, text="Enter username")
+user_name_label.grid(row=0, column=0, pady=(10, 0))
+
+user_pass_label = Label(create_frame, text="Enter password")
+user_pass_label.grid(row=1, column=0)
+
+username_entry = Entry(create_frame, width=30)
+username_entry.grid(row=0, column=1, pady=(10, 0), padx=(10, 0))
+
+password_entry = Entry(create_frame, width=30)
+password_entry.grid(row=1, column=1, padx=(10, 0))
+
+# create button part
+create_button = Button(create_button_frame, text="Save", width=15, borderwidth=4, command=lambda:inser_data(username_entry.get(), password_entry.get()))
+create_button.pack(pady=(5, 0))
+
+title_login_label = Label(create_button_frame, text="Login section", font=("Arial", 14, "bold"))
+title_login_label.pack(pady=(20, 0))
+
+# login frame part
+user_name_label = Label(login_frame, text="Enter username")
+user_name_label.grid(row=0, column=0, pady=(10, 0))
+
+user_pass_label = Label(login_frame, text="Enter password")
+user_pass_label.grid(row=1, column=0)
+
+username_entry_login = Entry(login_frame, width=30)
+username_entry_login.grid(row=0, column=1, pady=(10, 0), padx=(10, 0))
+username_entry_login.focus()
+
+password_entry_login = Entry(login_frame, width=30)
+password_entry_login.grid(row=1, column=1, padx=(10, 0))
+
+# entry frame part
+enter_label = Button(enter_frame, text="Enter", width=15, borderwidth=4,command=lambda:login(username_entry_login.get(), password_entry_login.get()))
+enter_label.pack(pady=(5, 0))
+
+confirm_message = Label(enter_frame, text=" ")
+confirm_message.pack()
+
+root.mainloop()
+
